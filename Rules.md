@@ -22,7 +22,7 @@
 - 🏷️ Tag @Prathxm only for urgent issues
 
 ## 🛠️ Better Help Tips
-- 💻 Include system info (OS, Python version)
+- 💻 Include system info (OS, Go version)
 - ⌨️ Share exact failing command
 - ⚙️ Include config files if relevant
 
