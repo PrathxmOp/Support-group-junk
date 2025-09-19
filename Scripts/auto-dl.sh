@@ -44,15 +44,21 @@ BINARY_NAME=$(detect_os_arch)
 echo "Detected system: $(uname -s) $(uname -m)"
 echo "Target binary: $BINARY_NAME"
 
-# Remove existing binaries if they exist (clean up any old versions)
+# Remove existing binaries and symlinks if they exist (clean up any old versions)
 echo "Cleaning up existing binaries..."
 for old_binary in dab-downloader-linux-amd64 dab-downloader-linux-arm64 dab-downloader-macos-amd64 dab-downloader-windows-amd64.exe dab-downloader; do
-    if [ -f "$old_binary" ]; then
+    if [ -e "$old_binary" ] || [ -L "$old_binary" ]; then
         echo "Removing existing $old_binary..."
         rm -f "$old_binary"
         echo "✓ Removed $old_binary"
     fi
 done
+
+# Additional cleanup - remove any broken symlinks
+if [ -L "$BINARY_NAME" ] && [ ! -e "$BINARY_NAME" ]; then
+    echo "Removing broken symlink $BINARY_NAME..."
+    rm -f "$BINARY_NAME"
+fi
 
 # Get the latest release URL from GitHub API
 echo "Fetching latest release information..."
@@ -71,12 +77,27 @@ fi
 
 echo "Latest release URL: $LATEST_URL"
 
-# Download the latest version
+# Download the latest version with better error handling
 echo "Downloading latest $BINARY_NAME..."
-if curl -L -o "$BINARY_NAME" "$LATEST_URL"; then
+
+# Ensure we have a clean target file
+rm -f "$BINARY_NAME" 2>/dev/null || true
+
+# Download with verbose error reporting
+if curl -L --fail --show-error --create-dirs -o "$BINARY_NAME" "$LATEST_URL"; then
     echo "✓ Download completed successfully"
+    
+    # Verify the download
+    if [ ! -f "$BINARY_NAME" ] || [ ! -s "$BINARY_NAME" ]; then
+        echo "❌ Error: Downloaded file is missing or empty"
+        exit 1
+    fi
+    
+    echo "✓ Download verified ($(du -h "$BINARY_NAME" | cut -f1) downloaded)"
 else
     echo "❌ Error: Failed to download the binary"
+    echo "URL attempted: $LATEST_URL"
+    echo "Please check your internet connection and try again"
     exit 1
 fi
 
