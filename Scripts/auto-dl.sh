@@ -131,14 +131,16 @@ if [ -f "$BINARY_NAME" ]; then
         ls -la dab-downloader
     fi
     
-    # Try to show version if the binary supports it
+    # Show basic info without executing the binary
     echo ""
-    echo "Testing binary (attempting to show version):"
+    echo "Binary information:"
     if [[ "$BINARY_NAME" == *.exe ]]; then
-        echo "Windows executable downloaded and ready to use"
+        echo "✅ Windows executable downloaded and ready to use"
         echo "Run with: ./$BINARY_NAME"
     else
-        ./"$BINARY_NAME" --version 2>/dev/null || ./"$BINARY_NAME" -v 2>/dev/null || echo "Binary downloaded and ready to use (version info not available)"
+        echo "✅ Binary downloaded and ready to use"
+        echo "File size: $(du -h "$BINARY_NAME" | cut -f1)"
+        echo "Run with: ./$BINARY_NAME"
         echo "You can also run with the generic name: ./dab-downloader"
     fi
     
@@ -153,3 +155,8 @@ echo "Primary binary: ./$BINARY_NAME"
 if [ -L "dab-downloader" ]; then
     echo "Generic shortcut: ./dab-downloader"
 fi
+echo ""
+echo "📋 Next steps:"
+echo "1. Run ./$BINARY_NAME (or ./dab-downloader) to start initial configuration"
+echo "2. Follow the prompts to set up your DAB API, Spotify credentials, etc."
+echo "3. Start downloading your music!"
